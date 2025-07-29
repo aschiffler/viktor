@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     build-essential \
-    pkg-config \
+    pkg-config
     && git clone https://github.com/HKUDS/LightRAG.git .
     && rm -rf /var/lib/apt/lists/* \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
