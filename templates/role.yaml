@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: full-access-role
+  namespace: {{ .Release.Namespace }}
+rules:
+- apiGroups: ["", "apps", "extensions", "batch", "networking.k8s.io"] # "" refers to core API group
+  resources: ["*"] # All resources (pods, deployments, services, etc.)
+  verbs: ["*"]     # All verbs (get, list, watch, create, update, patch, delete)
+- apiGroups: ["rbac.authorization.k8s.io"] # For managing RBAC resources within the namespace
+  resources: ["roles", "rolebindings"]
+  verbs: ["*"]

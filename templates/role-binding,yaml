@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: full-access-binding
+  namespace: {{ .Release.Namespace }}
+subjects:
+- kind: ServiceAccount # Can also be 'User' or 'Group'
+  name: default    # Name of the ServiceAccount (or User/Group)
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role     # This refers to a Role (not a ClusterRole)
+  name: full-access-role # Name of the Role created in Step 2
+  apiGroup: rbac.authorization.k8s.io

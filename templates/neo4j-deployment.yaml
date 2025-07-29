@@ -31,16 +31,9 @@ spec:
             - name: {{ $key }}
               value: {{ $value | quote }}
             {{- end }}
-            - name: NEO4J_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "neo4j.fullname" . }}-secret
-                  key: neo4jUsername
-            - name: NEO4J_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "neo4j.fullname" . }}-secret
-                  key: neo4jPassword
+          envFrom:
+            - secretRef:
+                name: {{ include "neo4j.fullname" . }}-secret
           volumeMounts:
             - name: neo4j-plugins
               mountPath: /var/lib/neo4j/plugins
@@ -50,36 +43,6 @@ spec:
               mountPath: /data
             - name: neo4j-backups
               mountPath: /backups
-          readinessProbe:
-            exec:
-              command:
-                - cypher-shell
-                - -a
-                - bolt://localhost:7687
-                - -u
-                - $(NEO4J_USERNAME)
-                - -p
-                - $(NEO4J_PASSWORD)
-                - 'RETURN 1'
-            initialDelaySeconds: 30 # start_period in docker-compose
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 5
-          livenessProbe:
-            exec:
-              command:
-                - cypher-shell
-                - -a
-                - bolt://localhost:7687
-                - -u
-                - $(NEO4J_USERNAME)
-                - -p
-                - $(NEO4J_PASSWORD)
-                - 'RETURN 1'
-            initialDelaySeconds: 60 # A bit longer for liveness
-            periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 3
       volumes:
         - name: neo4j-plugins
           emptyDir: {} # Plugins directory can be empty or a dedicated PVC if you need persistence for plugins

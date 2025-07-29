@@ -4,8 +4,8 @@
 
 lightrag:
   image:
-    repository: viktorbuild/enefitbot
-    tag: latest
+    repository: ghcr.io/aschiffler/viktor
+    tag: sha-f23229e
     pullPolicy: IfNotPresent
   name: lightrag
   containerName: lightrag-app
@@ -56,7 +56,6 @@ lightrag:
     LIGHTRAG_VECTOR_STORAGE: NanoVectorDBStorage
     LIGHTRAG_GRAPH_STORAGE: Neo4JStorage
     LIGHTRAG_DOC_STATUS_STORAGE: JsonDocStatusStorage
-    NEO4J_USERNAME: neo4j
     TOKEN_EXPIRE_HOURS: 4
     GUEST_TOKEN_EXPIRE_HOURS: 4
     JWT_ALGORITHM: HS256
@@ -101,12 +100,27 @@ neo4j:
     NEO4J_apoc_export_file_enabled: "true"
     NEO4J_apoc_import_file_enabled: "true"
     NEO4J_apoc_import_file_use__neo4j__config: "true"
+    NEO4J_server_config_strict__validation_enabled: "true"
     NEO4J_server_default__listen__address: "0.0.0.0"
     NEO4J_server_default__advertised__address: "neo4j"
   secret:
     neo4jUsername: "neo4j" # Default, change this in a production environment or via --set
     neo4jPassword: "password" # Default, change this in a production environment or via --set
-    neo4jEndpoint: bolt://neo4j:7687
 
 # Global settings
 commonLabels: {}
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: azure-issuer-cluster
+  hosts:
+    - host: viktor.thws.education
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - secretName: viktor-thws-education
+      hosts:
+        - viktor.thws.education
