@@ -9,11 +9,10 @@ RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
     pkg-config \
+    && git clone https://github.com/HKUDS/LightRAG.git .
     && rm -rf /var/lib/apt/lists/* \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     && . $HOME/.cargo/env
-
-RUN git clone https://github.com/HKUDS/LightRAG.git .    
 
 # Copy pyproject.toml and source code for dependency installation
 COPY pyproject.toml .
