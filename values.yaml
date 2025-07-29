@@ -26,18 +26,42 @@ lightrag:
       size: 1Gi # Adjust size as needed
       accessModes:
         - ReadWriteOnce
-  config:
-    # Example config.ini content. You should put your actual config.ini content here.
-    # It will be mounted as a ConfigMap.
-    configIniContent: |
-      [general]
-      debug_mode = false
-      # Add other config.ini content here
+  secret:
+    apiKeySecret: supersecretapikey
+    tokenSecret: supersecret
+    apiEndpoint: https://api.example.com
+    apiKey: 4711
+    account: admin:admin
   env:
-    # Environment variables from your .env file.
-    # Sensitive variables should go into a Secret.
-    # Example non-sensitive variables:
     PORT: 9621
+    WEBUI_TITLE: Graph RAG Engine
+    WEBUI_DESCRIPTION: Simple and Fast Graph Based RAG System
+    SUMMARY_LANGUAGE: English
+    TIMEOUT: 60
+    TEMPERATURE: 0.5
+    MAX_ASYNC: 4
+    MAX_TOKENS: 30000
+    ENABLE_LLM_CACHE: true
+    ENABLE_LLM_CACHE_FOR_EXTRACT: true
+    LLM_BINDING: azure_openai
+    LLM_MODEL: gpt-4.1-mini
+    EMBEDDING_MODEL: text-embedding-3-small
+    EMBEDDING_DIM: 1536
+    EMBEDDING_BINDING: azure_openai
+    AZURE_OPENAI_API_VERSION: 2024-12-01-preview
+    AZURE_OPENAI_DEPLOYMENT: gpt-4.1-mini
+    AZURE_EMBEDDING_DEPLOYMENT: text-embedding-3-small
+    AZURE_EMBEDDING_API_VERSION: 2024-02-01
+    LIGHTRAG_KV_STORAGE: JsonKVStorage
+    LIGHTRAG_VECTOR_STORAGE: NanoVectorDBStorage
+    LIGHTRAG_GRAPH_STORAGE: Neo4JStorage
+    LIGHTRAG_DOC_STATUS_STORAGE: JsonDocStatusStorage
+    NEO4J_USERNAME: neo4j
+    TOKEN_EXPIRE_HOURS: 4
+    GUEST_TOKEN_EXPIRE_HOURS: 4
+    JWT_ALGORITHM: HS256
+    WHITELIST_PATHS: /health,/api/*
+
 
 neo4j:
   image:
@@ -80,9 +104,9 @@ neo4j:
     NEO4J_server_default__listen__address: "0.0.0.0"
     NEO4J_server_default__advertised__address: "neo4j"
   secret:
-    # These will be created as a Kubernetes Secret
     neo4jUsername: "neo4j" # Default, change this in a production environment or via --set
     neo4jPassword: "password" # Default, change this in a production environment or via --set
+    neo4jEndpoint: bolt://neo4j:7687
 
 # Global settings
 commonLabels: {}
