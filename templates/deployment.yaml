@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "lightrag.fullname" . }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: lightrag
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "lightrag-chart.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: lightrag
+  template:
+    metadata:
+      labels:
+        {{- include "lightrag-chart.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: lightrag
+    spec:
+      containers:
+        - name: {{ .Values.lightrag.containerName }}
+          image: "{{ .Values.lightrag.image.repository }}:{{ .Values.lightrag.image.tag }}"
+          imagePullPolicy: {{ .Values.lightrag.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.lightrag.port }}
+              name: http
+          env:
+            {{- range $key, $value := .Values.lightrag.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            # Example for .env content that might be sensitive or part of a Secret
+            # - name: MY_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: {{ include "lightrag.fullname" . }}-env-secret
+            #       key: MY_API_KEY
+          volumeMounts:
+            - name: lightrag-rag-storage
+              mountPath: /app/data/rag_storage
+            - name: lightrag-inputs
+              mountPath: /app/data/inputs
+            - name: lightrag-config-ini
+              mountPath: /app/config.ini
+              subPath: config.ini # Mount only the config.ini file
+            - name: lightrag-env-secret
+              mountPath: /app/.env
+              subPath: .env # Mount only the .env file
+          # Health checks (if applicable, based on your app's readiness)
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: http
+          #   initialDelaySeconds: 5
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: http
+          #   initialDelaySeconds: 15
+          #   periodSeconds: 20
+      volumes:
+        - name: lightrag-rag-storage
+          persistentVolumeClaim:
+            claimName: {{ .Values.lightrag.persistence.ragStorage.name }}
+        - name: lightrag-inputs
+          persistentVolumeClaim:
+            claimName: {{ .Values.lightrag.persistence.inputs.name }}
+        - name: lightrag-config-ini
+          configMap:
+            name: {{ include "lightrag.fullname" . }}-config
+        - name: lightrag-env-secret
+          secret:
+            secretName: {{ include "lightrag.fullname" . }}-env-secret

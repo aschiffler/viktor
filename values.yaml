@@ -1,0 +1,88 @@
+# Default values for lightrag-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+lightrag:
+  image:
+    repository: viktorbuild/enefitbot
+    tag: latest
+    pullPolicy: IfNotPresent
+  name: lightrag
+  containerName: lightrag-app
+  port: 9621
+  service:
+    type: ClusterIP
+    port: 9621
+    targetPort: 9621
+  persistence:
+    enabled: true
+    ragStorage:
+      name: lightrag-rag-storage
+      size: 1Gi # Adjust size as needed
+      accessModes:
+        - ReadWriteOnce
+    inputs:
+      name: lightrag-inputs
+      size: 1Gi # Adjust size as needed
+      accessModes:
+        - ReadWriteOnce
+  config:
+    # Example config.ini content. You should put your actual config.ini content here.
+    # It will be mounted as a ConfigMap.
+    configIniContent: |
+      [general]
+      debug_mode = false
+      # Add other config.ini content here
+  env:
+    # Environment variables from your .env file.
+    # Sensitive variables should go into a Secret.
+    # Example non-sensitive variables:
+    PORT: 9621
+
+neo4j:
+  image:
+    repository: neo4j
+    tag: 5.26.4-community
+    pullPolicy: IfNotPresent
+  name: neo4j
+  containerName: lightrag-neo4j
+  ports:
+    browser: 7474
+    bolt: 7687
+  service:
+    type: ClusterIP
+    browserPort: 7474
+    boltPort: 7687
+    browserTargetPort: 7474
+    boltTargetPort: 7687
+  persistence:
+    enabled: true
+    import:
+      name: lightrag-neo4j-import
+      size: 1Gi # Adjust size as needed
+      accessModes:
+        - ReadWriteOnce
+    data:
+      name: lightrag-neo4j-data
+      size: 10Gi # Adjust size as needed
+      accessModes:
+        - ReadWriteOnce
+    backups:
+      name: lightrag-neo4j-backups
+      size: 5Gi # Adjust size as needed
+      accessModes:
+        - ReadWriteOnce
+  environment:
+    NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+    NEO4J_apoc_export_file_enabled: "true"
+    NEO4J_apoc_import_file_enabled: "true"
+    NEO4J_apoc_import_file_use__neo4j__config: "true"
+    NEO4J_server_default__listen__address: "0.0.0.0"
+    NEO4J_server_default__advertised__address: "neo4j"
+  secret:
+    # These will be created as a Kubernetes Secret
+    neo4jUsername: "neo4j" # Default, change this in a production environment or via --set
+    neo4jPassword: "password" # Default, change this in a production environment or via --set
+
+# Global settings
+commonLabels: {}

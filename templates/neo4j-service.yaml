@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "neo4j.fullname" . }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+spec:
+  type: {{ .Values.neo4j.service.type }}
+  ports:
+    - port: {{ .Values.neo4j.service.browserPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.neo4j.service.boltPort }}
+      targetPort: bolt
+      protocol: TCP
+      name: bolt
+  selector:
+    {{- include "lightrag-chart.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j

@@ -1,0 +1,43 @@
+{{- if .Values.neo4j.persistence.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.neo4j.persistence.import.name }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+spec:
+  accessModes:
+    {{- toYaml .Values.neo4j.persistence.import.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.neo4j.persistence.import.size }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.neo4j.persistence.data.name }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+spec:
+  accessModes:
+    {{- toYaml .Values.neo4j.persistence.data.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.neo4j.persistence.data.size }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.neo4j.persistence.backups.name }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: neo4j
+spec:
+  accessModes:
+    {{- toYaml .Values.neo4j.persistence.backups.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.neo4j.persistence.backups.size }}
+{{- end -}}

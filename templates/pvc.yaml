@@ -1,0 +1,29 @@
+{{- if .Values.lightrag.persistence.enabled -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.lightrag.persistence.ragStorage.name }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: lightrag
+spec:
+  accessModes:
+    {{- toYaml .Values.lightrag.persistence.ragStorage.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.lightrag.persistence.ragStorage.size }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.lightrag.persistence.inputs.name }}
+  labels:
+    {{- include "lightrag-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: lightrag
+spec:
+  accessModes:
+    {{- toYaml .Values.lightrag.persistence.inputs.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.lightrag.persistence.inputs.size }}
+{{- end -}}
