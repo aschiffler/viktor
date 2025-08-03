@@ -27,11 +27,11 @@ lightrag:
       accessModes:
         - ReadWriteOnce
   secret:
-    apiKeySecret: supersecretapikey
+    apiKeySecret: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ96
     tokenSecret: supersecret
     apiEndpoint: https://api.example.com
     apiKey: 4711
-    account: admin:admin
+    account: admin:G7nK2vM9tQX4aRb8
   env:
     PORT: 9621
     WEBUI_TITLE: Graph RAG Engine
