@@ -20,6 +20,7 @@ FROM python:3.11-slim
 WORKDIR /app
 COPY --from=builder /root/.local /root/.local
 COPY --from=builder /app/LightRAG/lightrag ./lightrag
+COPY prompt.py ./lightrag/prompt.py
 ENV PATH=/root/.local/bin:$PATH
 RUN mkdir -p /app/data/rag_storage /app/data/inputs
 ENV WORKING_DIR=/app/data/rag_storage
