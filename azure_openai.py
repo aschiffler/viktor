@@ -153,7 +153,7 @@ async def azure_openai_complete_if_cache(
         logger.warning("No non-empty messages to send to the LLM; returning empty string to avoid API error.")
         return ""
 
-    # Make the API call. Some SDKs use 'beta' for parse/structured responses.
+
     use_parse = "response_format" in kwargs
     try:
         if use_parse and hasattr(openai_async_client, "beta"):
@@ -161,11 +161,11 @@ async def azure_openai_complete_if_cache(
         else:
             response = await openai_async_client.chat.completions.create(model=model, messages=messages, **kwargs)
     except Exception:
-        # Let tenacity handle retryable exceptions; log and re-raise
+
         logger.exception("Error while calling Azure OpenAI chat completion")
         raise
 
-    # streaming case: response is async iterable
+
     if hasattr(response, "__aiter__"):
         async def _stream_generator() -> AsyncGenerator[str, None]:
             try:
@@ -176,13 +176,13 @@ async def azure_openai_complete_if_cache(
                         if not choices:
                             continue
                         first = choices[0]
-                        # try 'delta' then 'message' etc.
+
                         delta = getattr(first, "delta", None) or (first.get("delta") if isinstance(first, dict) else None)
                         content = None
                         if delta is not None:
                             content = getattr(delta, "content", None) or (delta.get("content") if isinstance(delta, dict) else None)
                         if content is None:
-                            # some stream chunks use 'message' with content
+
                             message_obj = getattr(first, "message", None) or (first.get("message") if isinstance(first, dict) else None)
                             if message_obj:
                                 content = getattr(message_obj, "content", None) or (message_obj.get("content") if isinstance(message_obj, dict) else None)
@@ -204,18 +204,18 @@ async def azure_openai_complete_if_cache(
 
         return _stream_generator()
 
-    # non-streaming: pick content safely
+
     content: Optional[str] = None
     try:
-        # try object-like access first
+
         choices = getattr(response, "choices", None) or (response.get("choices") if isinstance(response, dict) else None)
         if choices and len(choices) > 0:
             first = choices[0]
-            # newest style: first.message.content
+
             message_obj = getattr(first, "message", None) or (first.get("message") if isinstance(first, dict) else None)
             if message_obj:
                 content = getattr(message_obj, "content", None) or (message_obj.get("content") if isinstance(message_obj, dict) else None)
-            # fallback: first.text (older completions)
+
             if content is None:
                 content = getattr(first, "text", None) or (first.get("text") if isinstance(first, dict) else None)
     except Exception:
@@ -255,7 +255,7 @@ async def azure_openai_complete(
         **kwargs,
     )
 
-    # if streaming -> return generator as-is
+
     if hasattr(result, "__aiter__"):
         return result
 
@@ -301,7 +301,7 @@ async def azure_openai_embed(
         api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
     )
 
-    # sanitize inputs but preserve index alignment
+
     sanitized = [_ensure_str(t) for t in texts]
     response = await openai_async_client.embeddings.create(model=model, input=sanitized, encoding_format="float")
     # response.data -> list of objects with .embedding or dicts with ['embedding']
