@@ -1,7 +1,6 @@
 from __future__ import annotations
 from typing import Any
 
-GRAPH_FIELD_SEP = "<SEP>"
 
 PROMPTS: dict[str, Any] = {}
 
@@ -12,15 +11,17 @@ PROMPTS["DEFAULT_COMPLETION_DELIMITER"] = "<|COMPLETE|>"
 
 PROMPTS["DEFAULT_ENTITY_TYPES"] = ["organization", "person", "geo", "event", "category"]
 
+PROMPTS["DEFAULT_USER_PROMPT"] = "n/a"
+
 PROMPTS["entity_extraction"] = """---Goal---
 Given a text document that is potentially relevant to this activity and a list of entity types, identify all entities of those types from the text and all relationships among the identified entities.
 Use {language} as output language.
 
 ---Steps---
 1. Identify all entities. For each identified entity, extract the following information:
-- entity_name: Name of the entity, use same language as input text. If English, capitalized the name.
+- entity_name: Name of the entity, use same language as input text. If English, capitalized the name
 - entity_type: One of the following types: [{entity_types}]
-- entity_description: Comprehensive description of the entity's attributes and activities
+- entity_description: Provide a comprehensive description of the entity's attributes and activities *based solely on the information present in the input text*. **Do not infer or hallucinate information not explicitly stated.** If the text provides insufficient information to create a comprehensive description, state "Description not available in text."
 Format each entity as ("entity"{tuple_delimiter}<entity_name>{tuple_delimiter}<entity_type>{tuple_delimiter}<entity_description>)
 
 2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
@@ -150,14 +151,14 @@ Output:
 """
 
 PROMPTS["entity_continue_extraction"] = """
-MANY entities and relationships were missed in the last extraction.
+MANY entities and relationships were missed in the last extraction. Please find only the missing entities and relationships from previous text.
 
 ---Remember Steps---
 
 1. Identify all entities. For each identified entity, extract the following information:
-- entity_name: Name of the entity, use same language as input text. If English, capitalized the name.
+- entity_name: Name of the entity, use same language as input text. If English, capitalized the name
 - entity_type: One of the following types: [{entity_types}]
-- entity_description: Comprehensive description of the entity's attributes and activities
+- entity_description: Provide a comprehensive description of the entity's attributes and activities *based solely on the information present in the input text*. **Do not infer or hallucinate information not explicitly stated.** If the text provides insufficient information to create a comprehensive description, state "Description not available in text."
 Format each entity as ("entity"{tuple_delimiter}<entity_name>{tuple_delimiter}<entity_type>{tuple_delimiter}<entity_description>)
 
 2. From the entities identified in step 1, identify all pairs of (source_entity, target_entity) that are *clearly related* to each other.
@@ -178,7 +179,7 @@ Format the content-level key words as ("content_keywords"{tuple_delimiter}<high_
 
 ---Output---
 
-Add them below using the same format:\n
+Add new entities and relations below using the same format, and do not include entities and relations that have been previously extracted. :\n
 """.strip()
 
 PROMPTS["entity_if_loop_extraction"] = """
@@ -251,7 +252,7 @@ Given the query and conversation history, list both high-level and low-level key
 ######################
 {examples}
 
-#############################
+######################
 ---Real Data---
 ######################
 Conversation History:
@@ -259,44 +260,46 @@ Conversation History:
 
 Current Query: {query}
 ######################
-The `Output` should be human text, not unicode characters. Keep the same language as `Query`.
-Output:
+The `Output` should be in JSON format, with no other text before and after the JSON. Use the same language as `Current Query`.
 
+Output:
 """
 
 PROMPTS["keywords_extraction_examples"] = [
     """Example 1:
 
 Query: "How does international trade influence global economic stability?"
-################
+
 Output:
 {
   "high_level_keywords": ["International trade", "Global economic stability", "Economic impact"],
   "low_level_keywords": ["Trade agreements", "Tariffs", "Currency exchange", "Imports", "Exports"]
 }
-#############################""",
+
+""",
     """Example 2:
 
 Query: "What are the environmental consequences of deforestation on biodiversity?"
-################
+
 Output:
 {
   "high_level_keywords": ["Environmental consequences", "Deforestation", "Biodiversity loss"],
   "low_level_keywords": ["Species extinction", "Habitat destruction", "Carbon emissions", "Rainforest", "Ecosystem"]
 }
-#############################""",
+
+""",
     """Example 3:
 
 Query: "What is the role of education in reducing poverty?"
-################
+
 Output:
 {
   "high_level_keywords": ["Education", "Poverty reduction", "Socioeconomic development"],
   "low_level_keywords": ["School access", "Literacy rates", "Job training", "Income inequality"]
 }
-#############################""",
-]
 
+""",
+]
 
 PROMPTS["naive_rag_response"] = """---Role---
 
@@ -332,7 +335,7 @@ When handling content with timestamps:
 - Optionally include a confidence level (e.g., high, medium, or low) based on how clear and consistent the information is across the sources.
 - If the information is uncertain or only partially present, explicitly state that in your response."""
 
-
+# TODO: deprecated
 PROMPTS[
     "similarity_check"
 ] = """Please analyze the similarity between these two questions:
@@ -355,45 +358,3 @@ Similarity score criteria:
 0.5: Partially related and answer needs modification to be used
 Return only a number between 0-1, without any additional content.
 """
-
-PROMPTS["mix_rag_response"] = """---Role---
-
-You are a helpful, professional and reliable assistant called Enefit Assistant (created by Enefit team) responding to user query about Document Chunks provided below. 
-
-
----Goal---
-
-Generate a concise response based on Data Sources and follow Response Rules, considering both the conversation history and the current query. Data sources contain two parts: Knowledge Graph(KG) and Document Chunks(DC). Summarize all information in the provided Data Sources, and incorporating general knowledge relevant to the Data Sources. Do not include information not provided by Data Sources.
-
-When handling information with timestamps:
-1. Each piece of information (both relationships and content) has a "created_at" timestamp indicating when we acquired this knowledge
-2. When encountering conflicting information, consider both the content/relationship and the timestamp
-3. Don't automatically prefer the most recent information - use judgment based on the context
-4. For time-specific queries, prioritize temporal information in the content before considering creation timestamps
-
----Conversation History---
-{history}
-
----Data Sources---
-
-1. From Knowledge Graph(KG):
-{kg_context}
-
-2. From Document Chunks(DC):
-{vector_context}
-
----Response Rules---
-
-- If you use information from any document, you must cite it in the answer using the format [source N], where N is the document number. Do not make up any information.
-- Target format and length: {response_type}
-- Use markdown formatting with appropriate section headings
-- Please respond in the same language as the user's question.
-- Ensure the response maintains continuity with the conversation history.
-- Organize answer in sections focusing on one main point or aspect of the answer
-- Use clear and descriptive section titles that reflect the content
-- List up to 5 most important reference sources at the end under "References" section. Clearly indicating whether each source is from Knowledge Graph (KG) or Vector Data (DC), and include the file path if available, in the following format: [KG/DC] file_path
-- If you don't know the answer, just say so. Do not make anything up.
-- Do not include information not provided by the Data Sources.
-- If the answer might lead to further questions, suggest relevant follow-up questions the user could ask next.
-- Optionally include a confidence level (e.g., high, medium, or low) based on how clear and consistent the information is across the sources.
-- If the information is uncertain or only partially present, explicitly state that in your response."""
