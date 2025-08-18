@@ -15,8 +15,9 @@ WORKDIR /app/LightRAG
 RUN git checkout ee53e43568d40c418bb4f2e34835886b9568ca38
 
 
-COPY prompt.py /app/LightRAG/lightrag/prompt.py
-COPY azure_openai.py /app/LightRAG/lightrag/llm/azure_openai.py
+COPY ./prompt.py /app/LightRAG/lightrag/prompt.py
+COPY ./azure_openai.py /app/LightRAG/lightrag/llm/azure_openai.py
+
 
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
