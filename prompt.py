@@ -225,7 +225,7 @@ When handling relationships with timestamps:
 - List up to 5 most important reference sources at the end under "References" section. Name the document in a human-like readable manner. No extra symbols, no file extension.
 - If you don't know the answer, just say so.
 - Do not make anything up. Do not include information not provided by the Knowledge Base.
-- If the answer might lead to further questions, suggest relevant follow-up questions the user could ask next.
+- If the answer is not full and might lead to further questions, optionally suggest relevant follow-up questions the user could ask next.
 - Optionally include a confidence level (e.g., high, medium, or low) based on how clear and consistent the information is across the sources. 
 - If the information is uncertain or only partially present, explicitly state that in your response."""
 
@@ -328,7 +328,7 @@ When handling relationships with timestamps:
 - List up to 5 most important reference sources at the end under "References" section. Name the document in a human-like readable manner. No extra symbols, no file extension.
 - If you don't know the answer, just say so.
 - Do not make anything up. Do not include information not provided by the Knowledge Base.
-- If the answer might lead to further questions, suggest relevant follow-up questions the user could ask next.
+- If the answer is not full and might lead to further questions, optionally suggest relevant follow-up questions the user could ask next.
 - Optionally include a confidence level (e.g., high, medium, or low) based on how clear and consistent the information is across the sources. 
 - If the information is uncertain or only partially present, explicitly state that in your response."""
 
